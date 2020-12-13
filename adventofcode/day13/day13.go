@@ -32,9 +32,6 @@ func main() {
 	scheduleMap := make(map[int]int64)
 	for idx, time := range schedule {
 		if time != -1 {
-			//if idx > time {
-			//  idx = idx % time
-			//}
 			scheduleMap[idx] = int64(time)
 		}
 	}
@@ -51,7 +48,6 @@ func solve(scheduleMap map[int]int64) int64 {
 	time := int64(0)
 	solved := make(map[int]bool)
 
-	checks := 0
 	for len(solved) < len(scheduleMap) {
 		time += increment
 
@@ -62,19 +58,9 @@ func solve(scheduleMap map[int]int64) int64 {
 				fmt.Printf("Solved: %d, %d at %d\n", desiredTime, busTime, time)
 			}
 		}
-
-		checks++
-		if checks%1000000 == 0 {
-			fmt.Printf("checked %d\n", checks)
-			fmt.Println(time)
-		}
 	}
 
 	return time
-}
-
-func validate(currTime int, scheduleMap map[int]int) bool {
-	return true
 }
 
 func getEarliestTime(departTime int, schedule []int) (int, int) {
