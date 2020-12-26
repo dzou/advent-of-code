@@ -9,10 +9,12 @@ type Node struct {
 }
 
 func main() {
-	cupsInput := "389125467"
+	cupsInput := "219347865"
 
 	var root *Node
 	var prev *Node
+
+	cache := make(map[int]*Node)
 
 	for _, r := range cupsInput {
 		num := r - '0'
@@ -25,62 +27,79 @@ func main() {
 			prev.next = &tmp
 			prev = &tmp
 		}
+		cache[int(num)] = prev
+	}
+
+	for i := 10; i <= 1000000; i++ {
+		tmp := Node{i, prev, nil}
+		prev.next = &tmp
+		prev = &tmp
+		cache[i] = prev
 	}
 
 	prev.next = root
 	root.prev = prev
 
 	fmt.Println(getSize(root))
-	simulate(root)
+	simulate(root, cache)
 
 	printCircle(root)
 }
 
-func simulate(root *Node) {
+func simulate(root *Node, cache map[int]*Node) {
 	count := 0
 	currNode := root
 	size := getSize(root)
 
-	for count < 100 {
+	for count < 10000000 {
+		var chunkNums = map[int]bool{0: true}
+
 		chunkStart := currNode.next
 		chunkEnd := currNode
 		for i := 0; i < 3; i++ {
 			chunkEnd = chunkEnd.next
+			chunkNums[chunkEnd.value] = true
 		}
+
 		currNode.next = chunkEnd.next
 		chunkEnd.next.prev = currNode
 
 		for i := 1; i < size+1; i++ {
 			searchVal := (currNode.value - i + (size + 1)) % (size + 1)
-
-			if foundNode := findNum(currNode, searchVal); foundNode != nil {
-				tmp := foundNode.next
-				foundNode.next = chunkStart
-				chunkStart.prev = foundNode
-
-				chunkEnd.next = tmp
-				tmp.prev = chunkEnd
-				break
+			if chunkNums[searchVal] {
+				continue
 			}
+
+			foundNode := cache[searchVal]
+
+			tmp := foundNode.next
+			foundNode.next = chunkStart
+			chunkStart.prev = foundNode
+
+			chunkEnd.next = tmp
+			tmp.prev = chunkEnd
+			break
 		}
 		currNode = currNode.next
 
-		printCircle(root)
 		count++
 	}
 }
 
 func findNum(root *Node, num int) *Node {
+	count := 0
 	if root.value == num {
 		return root
 	}
 
-	tmp := root.prev
+	tmp := root.next
 	for tmp != root {
+		count += 1
 		if tmp.value == num {
+			fmt.Println(count)
 			return tmp
 		}
-		tmp = tmp.prev
+		tmp = tmp.next
 	}
 
 	return nil
